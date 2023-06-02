@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+</head>
+<body>
+  <form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+    <?php if (isset($error)) { ?>
+      <p><?php echo $error; ?></p>
+    <?php } ?>
+    <label for="username">Username:</label><br>
+    <input type="text" name="username" required><br>
+    <label for="password">Password:</label><br>
+    <input type="password" name="password" required><br><br>
+    <input type="submit" name="submit" value="Login">
+  </form> 
+</body>
+</html>
