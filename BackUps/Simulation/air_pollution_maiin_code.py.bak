@@ -1,0 +1,336 @@
+# !/usr/bin/env python3
+
+# Compiler:  Python 3 (Proteus)
+
+#importing ncessary python libraries
+from goto import *
+import time
+import var
+import pio
+import resource
+import spidev
+import RPi.GPIO as GPIO
+import urllib.request
+import requests
+import smbus
+from ctypes import c_short
+from urllib.parse import urlparse
+import paho.mqtt.client as paho
+import os,sys
+
+GPIO.setwarnings(False)     # To avoid same PIN use warning
+
+# Peripheral Configuration(no need to edit this)
+#---CONFIG_BEGIN---
+import cpu
+import FileStore
+import VFP
+import Ports
+
+def peripheral_setup () :
+# Peripheral Constructors
+ pio.cpu=cpu.CPU ()
+ pio.storage=FileStore.FileStore ()
+ pio.server=VFP.VfpServer ()
+ pio.uart=Ports.UART ()
+ pio.storage.begin ()
+ pio.server.begin (0)
+# Install interrupt handlers
+
+def peripheral_loop () :
+ pass
+
+#---CONFIG_END---
+
+# Open SPI bus
+spi = spidev.SpiDev()
+spi.open(0,0)
+
+# Defining GPIO to LCD mapping
+LCD_RS = 4
+LCD_E  = 17
+LCD_D4 = 18
+LCD_D5 = 27
+LCD_D6 = 22
+LCD_D7 = 23
+# Defining sensor channels
+mq_channel  = 1
+
+#setting up mttq protocol
+def on_connect(self, mosq, obj, rc):
+        self.subscribe("Fan", 0)
+    
+def on_publish(mosq, obj, mid):
+    print("mid: " + str(mid))
+
+mqttc = paho.Client()                        # object declaration
+# Assign event callbacks
+mqttc.on_connect = on_connect
+mqttc.on_publish = on_publish
+
+url_str = os.environ.get('CLOUDMQTT_URL', 'tcp://broker.emqx.io:1883') 
+url = urlparse(url_str)
+mqttc.connect(url.hostname, url.port)
+
+'''
+define pin for lcd
+'''
+# Time constants
+E_PULSE = 0.0005
+E_DELAY = 0.0005
+delay = 1
+
+
+#Setting up GPIO pins and LCD pins
+GPIO.setup(LCD_E, GPIO.OUT)  # E
+GPIO.setup(LCD_RS, GPIO.OUT) # RS
+GPIO.setup(LCD_D4, GPIO.OUT) # DB4
+GPIO.setup(LCD_D5, GPIO.OUT) # DB5
+GPIO.setup(LCD_D6, GPIO.OUT) # DB6
+GPIO.setup(LCD_D7, GPIO.OUT) # DB7
+# Define some device constants
+LCD_WIDTH = 16    # Maximum characters per line
+LCD_CHR = True
+LCD_CMD = False
+LCD_LINE_1 = 0x80 # LCD RAM address for the 1st line
+LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
+
+'''
+Function Name :lcd_init()
+Function Description : this function is used to initialized lcd by sending the different commands
+'''
+def lcd_init():
+  # Initialise display
+  lcd_byte(0x33,LCD_CMD) # 110011 Initialise
+  lcd_byte(0x32,LCD_CMD) # 110010 Initialise
+  lcd_byte(0x06,LCD_CMD) # 000110 Cursor move direction
+  lcd_byte(0x0C,LCD_CMD) # 001100 Display On,Cursor Off, Blink Off
+  lcd_byte(0x28,LCD_CMD) # 101000 Data length, number of lines, font size
+  lcd_byte(0x01,LCD_CMD) # 000001 Clear display
+  time.sleep(E_DELAY)
+'''
+Function Name :lcd_byte(bits ,mode)
+Fuction Name :the main purpose of this function to convert the byte data into bit and send to lcd port
+'''
+def lcd_byte(bits, mode):
+  # Send byte to data pins
+  GPIO.output(LCD_RS, mode) # RS
+ 
+  # High bits
+  GPIO.output(LCD_D4, False)
+  GPIO.output(LCD_D5, False)
+  GPIO.output(LCD_D6, False)
+  GPIO.output(LCD_D7, False)
+  if bits&0x10==0x10:
+    GPIO.output(LCD_D4, True)
+  if bits&0x20==0x20:
+    GPIO.output(LCD_D5, True)
+  if bits&0x40==0x40:
+    GPIO.output(LCD_D6, True)
+  if bits&0x80==0x80:
+    GPIO.output(LCD_D7, True)
+ 
+  # Toggle 'Enable' pin
+  lcd_toggle_enable()
+ 
+  # Low bits
+  GPIO.output(LCD_D4, False)
+  GPIO.output(LCD_D5, False)
+  GPIO.output(LCD_D6, False)
+  GPIO.output(LCD_D7, False)
+  if bits&0x01==0x01:
+    GPIO.output(LCD_D4, True)
+  if bits&0x02==0x02:
+    GPIO.output(LCD_D5, True)
+  if bits&0x04==0x04:
+    GPIO.output(LCD_D6, True)
+  if bits&0x08==0x08:
+    GPIO.output(LCD_D7, True)
+ 
+  # Toggle 'Enable' pin
+  lcd_toggle_enable()
+'''
+Function Name : lcd_toggle_enable()
+Function Description:basically this is used to toggle Enable pin
+'''
+def lcd_toggle_enable():
+  # Toggle enable
+  time.sleep(E_DELAY)
+  GPIO.output(LCD_E, True)
+  time.sleep(E_PULSE)
+  GPIO.output(LCD_E, False)
+  time.sleep(E_DELAY)
+'''
+Function Name :lcd_string(message,line)
+Function  Description :print the data on lcd 
+'''
+def lcd_string(message,line):
+  # Send string to display
+ 
+  message = message.ljust(LCD_WIDTH," ")
+ 
+  lcd_byte(line, LCD_CMD)
+ 
+  for i in range(LCD_WIDTH):
+    lcd_byte(ord(message[i]),LCD_CHR)
+
+
+
+ 
+# Function to read SPI data from MCP3008 chip
+# Channel must be an integer 0-7
+def ReadChannel(channel):
+  adc = spi.xfer2([1,(8+channel)<<4,0])
+  my_data = ((adc[1]&3) << 8) + adc[2]
+  return my_data
+
+ 
+# Function to calculate air quality from
+# data, rounded to specified
+# number of decimal places.
+def ConvertAir(my_data,places):
+ 
+  # ADC Value
+  # (approx)   Air  Volts
+  #    0      -50    0.00
+  #   78      -25    0.25
+  #  155        0    0.50
+  #  233       25    0.75
+  #  310       50    1.00
+  #  465      100    1.50
+  #  775      200    2.50
+  # 1023      280    3.30
+ 
+  air = ((my_data * 330)/float(1023))
+  air = round(air,places)
+  return air
+ 
+def thingspeak_post(air):
+    URL='https://api.thingspeak.com/update?api_key='
+    #Private Key from thingspeak
+    API_KEY='VBKESVJMDAQO8ME0'
+    FIELD_HEADER='&field1={}'.format(air)
+    MY_NEW_URL=URL+API_KEY+FIELD_HEADER
+    print(MY_NEW_URL)
+    my_data=urllib.request.urlopen(MY_NEW_URL)
+    print(my_data)
+ 
+DEVICE = 0x77 # Default device I2C address
+ 
+#bus = smbus.SMBus(0)  # Rev 1 Pi uses 0
+bus = smbus.SMBus(1) # Rev 2 Pi uses 1 
+
+def convertToString(my_data):
+  # Simple function to convert binary data into
+  # a string
+  return str((my_data[1] + (256 * my_data[0])) / 1.2)
+
+def getShort(my_data, index):
+  # return two bytes from data as a signed 16-bit value
+  return c_short((my_data[index] << 8) + my_data[index + 1]).value
+
+def getUshort(my_data, index):
+  # return two bytes from data as an unsigned 16-bit value
+  return (my_data[index] << 8) + my_data[index + 1]
+
+def readBmp180Id(addr=DEVICE):
+  # Chip ID Register Address
+  REG_ID     = 0xD0
+  (chip_id, chip_version) = bus.read_i2c_block_data(addr, REG_ID, 2)
+  return (chip_id, chip_version)
+ 
+def readBmp180(addr=DEVICE):
+  # Register Addresses
+  REG_CALIB  = 0xAA
+  REG_MEAS   = 0xF4
+  REG_MSB    = 0xF6
+  REG_LSB    = 0xF7
+  # Control Register Address
+  CRV_TEMP   = 0x2E
+  CRV_PRES   = 0x34 
+  # Oversample setting
+  OVERSAMPLE = 3    # 0 - 3
+  
+  # Read calibration data
+  # Read calibration data from EEPROM
+  cal = bus.read_i2c_block_data(addr, REG_CALIB, 22)
+
+  # Convert byte data to word values
+  AC1 = getShort(cal, 0)
+  AC2 = getShort(cal, 2)
+  AC3 = getShort(cal, 4)
+  AC4 = getUshort(cal, 6)
+  AC5 = getUshort(cal, 8)
+  AC6 = getUshort(cal, 10)
+  B1  = getShort(cal, 12)
+  B2  = getShort(cal, 14)
+  MB  = getShort(cal, 16)
+  MC  = getShort(cal, 18)
+  MD  = getShort(cal, 20)
+ 
+  # Read Air quality
+  bus.write_byte_data(addr, REG_MEAS, CRV_TEMP)
+  time.sleep(0.005)
+  (msb, lsb) = bus.read_i2c_block_data(addr, REG_MSB, 2)
+  UT = (msb << 8) + lsb
+  # Refine air quality
+  X1 = ((UT - AC6) * AC5) >> 15
+  X2 = (MC << 11) / (X1 + MD)
+  B5 = X1 + X2
+  #air = int(B5 + 8) >> 4  
+ 
+# Defining delay between readings
+delay = 5
+lcd_init()
+lcd_string("welcome ",LCD_LINE_1)
+time.sleep(1)
+lcd_byte(0x01,LCD_CMD) # 000001 Clear display
+lcd_string("Air Pollution",LCD_LINE_1)
+lcd_string("Monitoring System ",LCD_LINE_2)
+time.sleep(1)
+lcd_byte(0x01,LCD_CMD) # 000001 Clear display
+# Main function
+def main () :
+# Setup
+ peripheral_setup()
+ peripheral_loop()
+# Infinite loop
+
+ while 1 :
+
+  air_level = ReadChannel(mq_channel) 
+  air       = ConvertAir(air_level,2)
+  threshold = 100
+  rc = mqttc.loop()
+  if air < threshold: 
+  # Print the fresh air results when the result is below threshold
+    lcd_byte(0x01,LCD_CMD) # 000001 Clear display
+    lcd_string("Fresh Air  ",LCD_LINE_1)
+    mqttc.publish("gas","Fresh Air")
+    lcd_string(str(air),LCD_LINE_2)
+    time.sleep(0.5)
+  
+  # Print the moderate air results when the result is equal to threshold
+  elif air == threshold:
+    lcd_byte(0x01,LCD_CMD) # 000001 Clear display
+    lcd_string("Moderate Air  ",LCD_LINE_1)
+    mqttc.publish("gas","Moderate Air")
+    lcd_string(str(air),LCD_LINE_2)
+    time.sleep(0.5)
+    
+  # Otherwise prints unhealthy air quality when the result is great than threshold
+  else:
+    lcd_byte(0x01,LCD_CMD) # 000001 Clear display
+    lcd_string("Unhealthy Air  ",LCD_LINE_1)
+    lcd_string(str(air),LCD_LINE_2)
+    mqttc.publish("gas","Unheathly Air, Please call the authorities!!")
+    time.sleep(0.5)  
+  
+   #Send data on thing speak server
+  thingspeak_post(air)
+  
+  pass
+  
+# Command line execution
+if __name__ == '__main__' :
+   main()
