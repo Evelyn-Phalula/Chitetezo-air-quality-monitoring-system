@@ -50,7 +50,8 @@ def on_connect(self, mosq, obj, rc):
 def on_publish(mosq, obj, mid):
     print("mid: " + str(mid))
 
-mqttc = paho.Client()                        # object declaration
+mqttc = paho.Client()                        
+#object declaration
 # Assign event callbacks
 mqttc.on_connect = on_connect
 mqttc.on_publish = on_publish
@@ -136,7 +137,7 @@ def lcd_byte(bits, mode):
   lcd_toggle_enable()
 '''
 Function Name : lcd_toggle_enable()
-Function Description:basically this is used to toggle Enable pin
+Function Description: this is used to toggle the Enable pin
 '''
 def lcd_toggle_enable():
   # Toggle enable
@@ -147,7 +148,7 @@ def lcd_toggle_enable():
   time.sleep(E_DELAY)
 '''
 Function Name :lcd_string(message,line)
-Function  Description :print the data on lcd 
+Function  Description : print data on lcd 
 '''
 def lcd_string(message,line):
   # Send string to display
@@ -161,7 +162,7 @@ def lcd_string(message,line):
 
 lcd_init()
 lcd_string("Welcome Everyone",LCD_LINE_1)
-lcd_string("This is GRoup 12 ",LCD_LINE_2)
+lcd_string("This is GRoup 12",LCD_LINE_2)
 time.sleep(2)
 lcd_string("Chitetezo Air Pollution",LCD_LINE_1)
 lcd_string("Monitoring System ",LCD_LINE_2)
@@ -184,7 +185,7 @@ ref = db.reference('/')
 
 adc = Adafruit_ADS1x15.ADS1115()
 GAIN =1
-
+#asynchronous websocket handler
 async def websocket_handler(websocket, path):
     # Open serial connection to serial port
     #ser = serial.Serial('/dev/ttyUSB0', 9600)
