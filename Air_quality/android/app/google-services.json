@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "449704211019",
+    "firebase_url": "https://chitetezo-6f57d-default-rtdb.firebaseio.com",
+    "project_id": "chitetezo-6f57d",
+    "storage_bucket": "chitetezo-6f57d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:449704211019:android:63673129d9ff7e6d5013ce",
+        "android_client_info": {
+          "package_name": "com.example.air_quality"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "449704211019-aumlrrli6tib2pqt1ohj9fh9mibv29kf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZlLuclU6P7d58xtAD1jokXzWOoKzonNk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "449704211019-aumlrrli6tib2pqt1ohj9fh9mibv29kf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
