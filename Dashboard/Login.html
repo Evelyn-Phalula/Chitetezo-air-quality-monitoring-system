@@ -4,6 +4,7 @@
   <title>Login</title>
 </head>
 <body>
+  <!--form for username and password-->
   <form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
     <?php if (isset($error)) { ?>
       <p><?php echo $error; ?></p>
