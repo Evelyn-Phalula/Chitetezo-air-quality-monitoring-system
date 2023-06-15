@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:io';
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as Badge;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -38,13 +39,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final FirebaseService firebaseService = FirebaseService();
   String currentValue = '';
+  late int sensorData = 0;
 
   @override
   void initState() {
-    super.initState(
-
-
-    );
+    super.initState();
 
     super.initState();
     firebaseService.fetchData().listen((event) {
@@ -54,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
         if (values.isNotEmpty) {
           setState(() {
             currentValue = values.last.toString();
+            sensorData = int.parse(currentValue);
           });
         } else {
           setState(() {
@@ -68,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     _configureFirebaseMessaging();
   }
+
   RemoteMessage? receivedMes;
   late String notificationTitle = '';
   late String notificationBody = '';
@@ -78,7 +79,6 @@ class _MyHomePageState extends State<MyHomePage> {
       print('Received message in foreground: ${message.notification?.title}');
       receivedMes = message;
       setState(() {
-
         notificationTitle = receivedMes?.notification?.title ?? '';
         notificationBody = receivedMes?.notification?.body ?? '';
         notificationCount++;
@@ -87,6 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
+
   Future<void> _firebaseMessagingBackgroundHandler(
       RemoteMessage message) async {
     print('Received message in background: ${message.notification?.title}');
@@ -94,14 +95,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     final snackBar = SnackBar(
       backgroundColor: Colors.indigo, // Set the desired background color
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if(notificationCount>0)
+          if (notificationCount > 0)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -109,16 +109,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text(notificationBody),
               ],
             ),
-
-          if (notificationCount == 0)
-            Text('No new notifications'),
+          if (notificationCount == 0) Text('No new notifications'),
         ],
       ),
       action: SnackBarAction(
         label: 'OK',
         textColor: Colors.white, // Set the label color to white
         onPressed: () {
-
           if (notificationCount > 0) {
             setState(() {
               notificationCount--;
@@ -138,26 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 30),
-            // ListTile(
-            //   contentPadding: const EdgeInsets.symmetric(horizontal: 30),
-            //   title: Text('Real-Time Data via Firebase',
-            //       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            //             color: Colors.white,
-            //             fontSize: 30,
-            //             fontWeight: FontWeight.bold,
-            //           )),
-            //   subtitle: Text('We make it real!',
-            //       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            //             color: Colors.white70,
-            //             fontSize: 20,
-            //             fontWeight: FontWeight.normal,
-            //           )),
-            //   trailing: const CircleAvatar(
-            //     radius: 40,
-            //     backgroundImage: AssetImage('assets/images/logo.png'),
-            //   ),
-            // ),
+            const SizedBox(height: 50),
             ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 30),
               title: Row(
@@ -167,20 +145,24 @@ class _MyHomePageState extends State<MyHomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Welcome To Chitetezo Air Pollution Monitoring System',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          'Chitetezo Air Pollution Monitoring System',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         Text(
                           'Green Air Initiatives',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white70,
-                            fontSize: 20,
-                            fontWeight: FontWeight.normal,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.white70,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.normal,
+                                  ),
                         ),
                       ],
                     ),
@@ -188,25 +170,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   GestureDetector(
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      // showDialog(
-                      //   context: context,
-                      //   builder: (BuildContext context) => AlertDialog(
-                      //     title: Text(notificationTitle),
-                      //     content: Text(notificationBody),
-                      //     actions: [
-                      //       TextButton(
-                      //         onPressed: () => Navigator.of(context).pop(),
-                      //         child: Text('OK'),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // );
                     },
                     // child: const CircleAvatar(
                     //   radius: 20,
                     //   backgroundImage: AssetImage('assets/images/notification_icon1.png'),
                     // ),
-                    child: Badge(
+                    child: Badge.Badge(
                       badgeContent: Text(
                         notificationCount.toString(),
                         style: TextStyle(color: Colors.white),
@@ -214,7 +183,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       badgeColor: Colors.red,
                       child: const CircleAvatar(
                         radius: 20,
-                        backgroundImage: AssetImage('assets/images/notification_icon1.png'),
+                        backgroundImage:
+                            AssetImage('assets/images/notification_icon1.png'),
                       ),
                     ),
                   ),
@@ -226,12 +196,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
-            const SizedBox(height: 20)
+            const SizedBox(height: 39)
           ],
         ),
       ),
       Container(
-        height: 500,
+        height: 530,
         color: Theme.of(context).primaryColor,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -243,15 +213,19 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  "Below 100: Good Air",
+                  "Reduce air pollution!",
                   style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold,color: Colors.green),
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green),
                 ),
                 const SizedBox(height: 30),
                 Text(
-                  "Above 100: Unhealthy Air",
+                  "Make Earth sustaintable!",
                   style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold, color: Colors.red),
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.indigo),
                 ),
                 const SizedBox(height: 30),
                 Align(
@@ -275,24 +249,78 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Center(
                       child: Column(
                         children: <Widget>[
-
                           SizedBox(
                             height: 30,
                           ),
                           Text(
                             "Air Quality Levels",
                             style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold),
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.indigo),
                           ),
                           SizedBox(height: 40),
-                          Text(
-                            currentValue,
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.normal),
-                          ),
+                          if (sensorData >= 0 && sensorData <=50)
+                            Text(
+                              '$currentValue Good Air',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green),
+                            ),
+                          if (sensorData > 50 && sensorData <= 100)
+                            Text(
+                              '$currentValue Moderate Air',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amber),
+                            ),
+                          if (sensorData > 100 && sensorData <= 150)
+                            Center(
+                              child: Text(
+                                '$currentValue Unhealthy Air\nfor Sensitive Groups\nPlease take a further action!',
+                                style: TextStyle(
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.brown),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          if (sensorData > 150 && sensorData <= 200)
+                            Center(
+                              child: Text(
+                                '$currentValue Unhealthy Air\nPlease take a further action!',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          if (sensorData > 200 && sensorData <= 300)
+                            Text(
+                              '$currentValue Very Unhealthy Air\nPlease take a further action!',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.deepPurpleAccent),
+                              textAlign: TextAlign.center,
+                            ),
+                          if (sensorData > 300)
+                            Center(
+                              child: Text(
+                                '$currentValue Hazardous Air\nPlease take a further action!',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.redAccent),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           SizedBox(height: 45),
                           Text(
-                            "Updates Automatically",
+                            "Real-Time Updates",
                             style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
@@ -354,6 +382,5 @@ class FirebaseService {
         .orderByKey()
         .limitToLast(1)
         .onValue;
-
   }
 }

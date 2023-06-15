@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter/widgets.dart';
 import 'firebase_data.dart';
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as Badge;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,19 +76,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _getToken();
   }
 
-  // late RemoteMessage? receivedMes;
-  //
-  //
-  // void _configureFirebaseMessaging() {
-  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-  //     print('Received message in foreground: ${message.notification?.title}');
-  //     receivedMes = message;
-  //   });
-  //
-  //   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  // }
-  // late String notificationTitle = receivedMes?.notification?.title ?? '';
-  // late String notificationBody = receivedMes?.notification?.body ?? '';
   RemoteMessage? receivedMes;
   late String notificationTitle = '';
   late String notificationBody = '';
@@ -106,13 +93,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   }
 
   Future<void> _firebaseMessagingBackgroundHandler(
       RemoteMessage message) async {
     print('Received message in background: ${message.notification?.title}');
   }
-
+void navigateToApp(){
+    setState(() {
+      notificationCount = 1;
+    });
+}
   Future<void> _getToken() async {
     String? token = await _firebaseMessaging.getToken();
     print('FCM Token: $token');
@@ -186,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             child: Column(
               children: [
-                const SizedBox(height: 30),
+                const SizedBox(height: 50),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 30),
                   title: Row(
@@ -224,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         },
-                        child: Badge(
+                        child: Badge.Badge(
                           badgeContent: Text(
                             notificationCount.toString(),
                             style: TextStyle(color: Colors.white),
@@ -245,12 +237,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 26),
+                const SizedBox(height: 56),
               ],
             ),
           ),
           Container(
-            height: 500,
+            height: 400,
             color: Theme.of(context).primaryColor,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -266,11 +258,28 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: <Widget>[
                     const SizedBox(height: 8),
                     Align(
-                      alignment: Alignment.center,
+                      alignment: Alignment.topCenter,
                       child: Container(
                         width: 300,
                         child: Column(
                           children: <Widget>[
+                            Text(
+                              "To breathe clean!",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.indigo,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              "You have to go green!",
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green),
+                            ),
+                            const SizedBox(height: 50),
                             Align(
                               alignment: Alignment.center,
                               child: Container(

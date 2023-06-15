@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:air_quality/sensor.dart';
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as Badge;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as http;
-
 import 'notifying.dart';
 
 Future<void> main() async {
@@ -48,8 +44,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _sensorData = '0';
-  double _sensor = 0;
   late String _serverIpAddress;
   String _portNumber = ''; // Default port number
   bool _isConnecting = false;
@@ -91,6 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _ipAddressFocusNode.dispose();
     super.dispose();
   }
+
   RemoteMessage? receivedMes;
   late String notificationTitle = '';
   late String notificationBody = '';
@@ -101,7 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
       print('Received message in foreground: ${message.notification?.title}');
       receivedMes = message;
       setState(() {
-
         notificationTitle = receivedMes?.notification?.title ?? '';
         notificationBody = receivedMes?.notification?.body ?? '';
         notificationCount++;
@@ -110,10 +104,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
+
   Future<void> _firebaseMessagingBackgroundHandler(
       RemoteMessage message) async {
     print('Received message in background: ${message.notification?.title}');
   }
+
   @override
   Widget build(BuildContext context) {
     final snackBar = SnackBar(
@@ -122,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if(notificationCount>0)
+          if (notificationCount > 0)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -130,16 +126,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text(notificationBody),
               ],
             ),
-
-          if (notificationCount == 0)
-            Text('No new notifications'),
+          if (notificationCount == 0) Text('No new notifications'),
         ],
       ),
       action: SnackBarAction(
         label: 'OK',
         textColor: Colors.white, // Set the label color to white
         onPressed: () {
-
           if (notificationCount > 0) {
             setState(() {
               notificationCount--;
@@ -159,27 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 30),
-            // ListTile(
-            //   contentPadding: const EdgeInsets.symmetric(horizontal: 30),
-            //   title: Text('Real-Time Data via WebSockets',
-            //       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            //             color: Colors.white,
-            //             fontSize: 30,
-            //             fontWeight: FontWeight.bold,
-            //           )),
-            //   subtitle: Text('Real-Time Updates',
-            //       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            //             color: Colors.white70,
-            //             fontSize: 20,
-            //             fontWeight: FontWeight.normal,
-            //           )),
-            //   trailing: const CircleAvatar(
-            //     radius: 40,
-            //     backgroundImage: AssetImage('assets/images/logo.png'),
-            //   ),
-            // ),
-
+            const SizedBox(height: 50),
             ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 30),
               title: Row(
@@ -189,20 +162,24 @@ class _MyHomePageState extends State<MyHomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Welcome To Chitetezo Air Pollution Monitoring System',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          'Chitetezo Air Pollution Monitoring System',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         Text(
                           'Green Air Initiatives',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white70,
-                            fontSize: 20,
-                            fontWeight: FontWeight.normal,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.white70,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.normal,
+                                  ),
                         ),
                       ],
                     ),
@@ -210,25 +187,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   GestureDetector(
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      // showDialog(
-                      //   context: context,
-                      //   builder: (BuildContext context) => AlertDialog(
-                      //     title: Text(notificationTitle),
-                      //     content: Text(notificationBody),
-                      //     actions: [
-                      //       TextButton(
-                      //         onPressed: () => Navigator.of(context).pop(),
-                      //         child: Text('OK'),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // );
                     },
                     // child: const CircleAvatar(
                     //   radius: 20,
                     //   backgroundImage: AssetImage('assets/images/notification_icon1.png'),
                     // ),
-                    child: Badge(
+                    child: Badge.Badge(
                       badgeContent: Text(
                         notificationCount.toString(),
                         style: TextStyle(color: Colors.white),
@@ -236,7 +200,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       badgeColor: Colors.red,
                       child: const CircleAvatar(
                         radius: 20,
-                        backgroundImage: AssetImage('assets/images/notification_icon1.png'),
+                        backgroundImage:
+                            AssetImage('assets/images/notification_icon1.png'),
                       ),
                     ),
                   ),
@@ -248,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
-            const SizedBox(height: 20)
+            const SizedBox(height: 39)
           ],
         ),
       ),
@@ -556,7 +521,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 const Text(
                                   'Air Quality Levels',
                                   style: TextStyle(
-                                    color: Colors.black,
+                                    color: Colors.indigo,
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -622,13 +587,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                     } else
                                       return Text(
                                         'Waiting for data...',
-                                        style: TextStyle(fontSize: 18),
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.green,
+                                            fontWeight: FontWeight.bold),
                                       );
                                   },
                                 ),
                                 SizedBox(height: 50),
                                 const Text(
-                                  "Updates Automatically",
+                                  "Real-Time Updates",
                                   style: TextStyle(
                                     color: Colors.indigo,
                                     fontSize: 16,
