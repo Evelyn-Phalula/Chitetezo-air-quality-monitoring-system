@@ -35,13 +35,13 @@ The beneficiary of this system could be anyone, especially people who suffer
 from respiratory diseases.
 
 The key stakeholders are; the Computer Science dept. team (Dr. Tiwonge Manda and Networking Lecturers), 
-Henry Kapalamula, students, and Lecturers in other departments. 
+Lecturers in other departments. 
 
 Hardware specification: Raspberry Pi 3, MQ135 (Gas sensor), smoke sensor MQ2,
 Temperature sensor DHT11, 16*2 LCD Display, LED, Buzzer, Resistors, Capacitors,
 Diodes, inductor, MCP3008 or ADS1115, cables, GSM module, and wires. 
  
-Software specification: Python and thingspeak. 
+Software specification: Python, dart, chitetezo web app, mobile app, javascript,
  
 GROUP MEMBERS
 
