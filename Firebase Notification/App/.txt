@@ -1,0 +1,87 @@
+[00:46, 13/06/2023] Macheda Graphics: const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+admin.initializeApp(functions.config().firebase);
+
+exports.helloWorld = functions.database.ref('notification/{id}').onWrite(evt => {
+    const payload = {
+        notification:{
+            title : 'Message from Cloud',
+            body : 'This is your body',
+            badge : '1',
+            sound : 'default'
+        }
+    };
+
+    return admin.database().ref('fcm-token').once('value').then(allToken => {
+        if(allToken.val()){
+            console.log('token available');
+            const token = Object.keys(allToken.val());
+            return admin.messaging().sendToDevice(token,payload);
+        }else{
+            console.log('No token available');
+        }
+    });
+});
+[03:25, 13/06/2023] Macheda Graphics: const admin = require('firebase-admin');
+const serviceAccount = require('C:/Users/BSC_COM_NE_12_18/Documents/chitetezo-6f57d-firebase-adminsdk-1r0do-3e71357924.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://chitetezo-6f57d-default-rtdb.firebaseio.com',
+});
+
+const tokensRef = admin.database().ref('tokens');
+const sensorDataRef = admin.database().ref('random_numbers');
+
+// Function to send a notification to a single device
+async function sendNotification(token, title, body) {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    token: token,
+    android: {
+      priority: 'high',
+    },
+  };
+
+  try {
+    const response = await admin.messaging().send(message);
+    console.log('Notification sent successfully:', response);
+  } catch (error) {
+    console.error('Error sending notification:', error);
+  }
+}
+
+// Retrieve sensor data from the database and send notifications
+sensorDataRef.once('value')
+  .then((snapshot) => {
+    const sensorData = snapshot.val();
+    if (sensorData) {
+      const values = Object.values(sensorData);
+
+      if (values.length > 0) {
+        const greatestValue = Math.max(...values);
+
+        return tokensRef.once('value')
+          .then((snapshot) => {
+            snapshot.forEach((childSnapshot) => {
+              const token = childSnapshot.val();
+              sendNotification(
+                token,
+                'Chitetezo Air Pollution Monitoring System',
+                `Greatest Sensor Data Value: ${greatestValue}`
+              );
+            });
+          });
+      } else {
+        throw new Error('No sensor data values found');
+      }
+    } else {
+      throw new Error('Sensor data not found');
+    }
+  })
+  .catch((error) => {
+    console.error('Error retrieving sensor data:', error);
+  });
