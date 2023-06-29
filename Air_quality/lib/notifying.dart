@@ -11,24 +11,28 @@ import 'package:flutter/services.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter/widgets.dart';
 import 'firebase_data.dart';
-import 'package:badges/badges.dart' as Badge;
-
+import 'package:badges/badges.dart';
+//main method
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
+  //initializing firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  //checking the token that is used to trigger functions on firebase
   final fcmToken = await FirebaseMessaging.instance.getToken();
   print("the token is: $fcmToken");
   runApp(const MyApp3());
 }
 
+//stateless widget
 class MyApp3 extends StatelessWidget {
   const MyApp3({Key? key}) : super(key: key);
 
   @override
+  //Title section
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -40,15 +44,16 @@ class MyApp3 extends StatelessWidget {
     );
   }
 }
-
+//stateful widget extended to use some classess
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-
+//class contain all the data and designs
 class _MyHomePageState extends State<MyHomePage> {
+  //connecting to firebase and initializaing varios variables
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final DatabaseReference _database =
       FirebaseDatabase.instance.reference().child('tokens');
@@ -76,11 +81,11 @@ class _MyHomePageState extends State<MyHomePage> {
     _getToken();
   }
 
+  //getting notifications from the firebase
   RemoteMessage? receivedMes;
   late String notificationTitle = '';
   late String notificationBody = '';
   int notificationCount = 0;
-
   void _configureFirebaseMessaging() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Received message in foreground: ${message.notification?.title}');
@@ -93,18 +98,27 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
   }
 
+  //Handles background notifications
   Future<void> _firebaseMessagingBackgroundHandler(
       RemoteMessage message) async {
     print('Received message in background: ${message.notification?.title}');
   }
-void navigateToApp(){
-    setState(() {
-      notificationCount = 1;
-    });
-}
+  // void navigateToApp() {
+  //   // Call this function when the user clicks on the notification and navigates to the app
+  //   setState(() {
+  //     notificationCount = 0; // Set notificationCount to 0
+  //   });
+  // }
+
+
+
+
+
+
+
+
   Future<void> _getToken() async {
     String? token = await _firebaseMessaging.getToken();
     print('FCM Token: $token');
@@ -216,7 +230,7 @@ void navigateToApp(){
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         },
-                        child: Badge.Badge(
+                        child: Badge(
                           badgeContent: Text(
                             notificationCount.toString(),
                             style: TextStyle(color: Colors.white),
@@ -243,6 +257,7 @@ void navigateToApp(){
           ),
           Container(
             height: 400,
+
             color: Theme.of(context).primaryColor,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -252,6 +267,7 @@ void navigateToApp(){
                   topLeft: Radius.circular(200),
                 ),
               ),
+
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -266,10 +282,9 @@ void navigateToApp(){
                             Text(
                               "To breathe clean!",
                               style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.indigo,
-                              ),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.indigo,),
                             ),
                             const SizedBox(height: 20),
                             Text(
