@@ -194,7 +194,7 @@ async def websocket_handler(websocket, path):
         data = adc.read_adc(0, gain=GAIN)
         #data2 = adc.read_adc(1, gain=GAIN)
         
-        #casring values of temperature and humidity into string
+        #casting values of temperature and humidity into string
         tem = str(temperature)
         hum = str(humidity)
         #declaring jsonfile that collect multiple data
@@ -335,7 +335,8 @@ async def websocket_handler(websocket, path):
     # Close serial connection
     ser.close()
 
-# Start web socket server
+#Start web socket server
+#define an asynchronous function called main() and then call asyncio.run() to run the main() function
 async def main():
     async with websockets.serve(websocket_handler, '192.168.0.05', 8765):
         await asyncio.Future()
