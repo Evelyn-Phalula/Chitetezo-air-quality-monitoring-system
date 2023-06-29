@@ -29,6 +29,13 @@
     />
   </head>
   <body>
+    <script>
+      function preventBackButton() {
+        window.history.forward();
+      }
+      
+      setTimeout("preventBackButton()", 0);
+      </script>
     <nav
     class="navbar navbar-dark bg-primary fixed-top flex-md-nowrap p-0 shadow"
   >

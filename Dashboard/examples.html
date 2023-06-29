@@ -31,17 +31,56 @@
       <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#"
         >Chitetezo Air Pollution Monitoring System</a
       >
-      <!-- <input
-        type="text"
-        class="form-control form-control-primary"
-        placeholder="Search..."
-        style="width: 500px"
-      /> -->
-      <ul class="navbar-nav px-3">
-        <li class="nav-item text-nowrap">
-          <a class="nav-link" href="#" style="color: #fff">Public Data</a>
-        </li>
-      </ul>
+      <!---Signing out the user-->
+      <div class="dropdown px-5">
+        <button
+          class="btn btn-primary dropdown-toggle"
+          type="button"
+          id="dropdownMenuButton1"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          User-Profile
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+          <li class="dropdown-item">
+            <i class="call bi bi-telephone-fill"></i>
+            <span id="user-login-number"></span>
+          </li>
+          <li class="nav-item">
+            <i class="call fa fas fa-sign-out-alt"></i
+            ><a class="dropdown-item" href="login/login.html">Log out</a>
+          </li>
+        </ul>
+      </div>
+
+      <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
+
+      <script>
+        // Initialize Firebase
+        const firebaseConfig1 = {
+          apiKey: "AIzaSyB2Q6xo_lzKKa_BwSEFXms_IXkA8GB1-Fc",
+          authDomain: "chitetezodashboard.firebaseapp.com",
+          projectId: "chitetezodashboard",
+          storageBucket: "chitetezodashboard.appspot.com",
+          messagingSenderId: "593870165377",
+          appId: "1:593870165377:web:f0f81c7d2c70218ddf4480",
+          measurementId: "G-53MJN4R477",
+        };
+
+        firebase.initializeApp(firebaseConfig1);
+        // Listen for the user authentication state changes
+        firebase.auth().onAuthStateChanged(function (user) {
+          if (user) {
+            // User is signed in, retrieve the phone number
+            var phoneNumber = user.phoneNumber;
+            var userLoginNumberElement =
+              document.getElementById("user-login-number");
+            userLoginNumberElement.textContent = phoneNumber;
+          }
+        });
+      </script>
     </nav>
     <!--Side Menu-->
     <div class="container-fluid">
@@ -62,13 +101,13 @@
             <a class="nav-link active" href="dashboard.html"> Contact Us </a>
           </li>
           <li class="nav-item">
-            <i class="call fa fa-smog " aria-hidden="true"></i>
+            <i class="call fa fa-smog" aria-hidden="true"></i>
             <a class="nav-link" href="about.html">About Us </a>
           </li>
-          <!-- <li class="nav-item">
-            <i class="call fa fa-question" aria-hidden="true"></i>
-            <a class="nav-link active" href="dashboard.html"> help </a>
-          </li> -->
+          <li class="nav-item">
+            <i class="call fa fas fa-sign-out-alt"></i>
+            <a class="nav-link active" href="login/login.html"> Log out </a>
+          </li>
         </ul>
       </div>
     </div>
@@ -88,7 +127,7 @@
           </div>
         </div>
 
-        <!--Car exhaust fumes-->
+        <!--Cars-->
         <div class="col-sm-5">
           <div class="card">
             <div class="card-body">
@@ -104,61 +143,58 @@
         <div class="col-sm-5">
           <div class="card">
             <div class="card-body">
-                <div class="photo">
-                    <img src="air8.jpg" alt="cars releasing Gases">
-                </div>
+              <div class="photo">
+                <img src="air8.jpg" alt="cars releasing Gases" />
+              </div>
             </div>
           </div>
         </div>
         <div class="col-sm-5">
-            <div class="card">
-              <div class="card-body">
-                  <div class="photo">
-                      <img src="air10.jpg" alt="cars releasing Gases">
-                  </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="photo">
+                <img src="air10.jpg" alt="cars releasing Gases" />
               </div>
             </div>
           </div>
-          <div class="col-sm-5">
-            <div class="card">
-              <div class="card-body">
-                  <div class="photo">
-                      <img src="air5.jpg" alt="cars releasing Gases">
-                  </div>
+        </div>
+        <div class="col-sm-5">
+          <div class="card">
+            <div class="card-body">
+              <div class="photo">
+                <img src="air5.jpg" alt="cars releasing Gases" />
               </div>
             </div>
           </div>
-          <div class="col-sm-5">
-            <div class="card">
-              <div class="card-body">
-                  <div class="photo">
-                      <img src="air6.jpg" alt="cars releasing Gases">
-                  </div>
+        </div>
+        <div class="col-sm-5">
+          <div class="card">
+            <div class="card-body">
+              <div class="photo">
+                <img src="air6.jpg" alt="cars releasing Gases" />
               </div>
             </div>
-          </div>    
-          <div class="col-sm-5">
-            <div class="card">
-              <div class="card-body">
-                  <div class="photo">
-                      <img src="air7.jpg" alt="cars releasing Gases">
-                  </div>
+          </div>
+        </div>
+        <div class="col-sm-5">
+          <div class="card">
+            <div class="card-body">
+              <div class="photo">
+                <img src="air7.jpg" alt="cars releasing Gases" />
               </div>
             </div>
-          </div> 
-          <div class="col-sm-5">
-            <div class="card">
-              <div class="card-body">
-                  <div class="photo">
-                      <img src="air8.jpg" alt="cars releasing Gases">
-                  </div>
+          </div>
+        </div>
+        <div class="col-sm-5">
+          <div class="card">
+            <div class="card-body">
+              <div class="photo">
+                <img src="air8.jpg" alt="cars releasing Gases" />
               </div>
             </div>
-          </div> 
+          </div>
+        </div>
       </div>
-      
-
-     
     </main>
     <script>
       document.querySelector("form").reset();
@@ -182,6 +218,11 @@
     <script
       src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
       integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
       crossorigin="anonymous"
     ></script>
   </body>
