@@ -1,8 +1,8 @@
 #importing all necessary libraries for the project
-import RPi.GPIO as GPIO     # Import Library to access GPIO PIN
-from urllib.parse import urlparse
-import paho.mqtt.client as paho
-import os,sys
+import RPi.GPIO as GPIO     
+from urllib.parse import urlparse 
+import paho.mqtt.client as paho 
+import os,sys #import 
 import time
 import serial
 import requests
@@ -18,9 +18,10 @@ from firebase_admin import db
 import Adafruit_ADS1x15
 import drivers
 from time import sleep
-GPIO.setmode(GPIO.BOARD)    # Consider complete raspberry-pi board
-GPIO.setwarnings(False)     # To avoid same PIN use warning
-display = drivers.Lcd()
+
+GPIO.setmode(GPIO.BOARD)    #set the GPIO numbering mode to GPIO.BOARD
+GPIO.setwarnings(False)     #disable GPIO pin warning
+display = drivers.Lcd()     #create an instance of the LCD class from the drivers module
 
 
 yellow_led = 7 # Define PIN for yellow led light
