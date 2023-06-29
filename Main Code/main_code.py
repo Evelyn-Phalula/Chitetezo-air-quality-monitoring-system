@@ -189,10 +189,10 @@ async def websocket_handler(websocket, path):
             print("Failed")
         time.sleep(5)
         
-        #getting data from ADC ADS1115
+        #receiving data from ADC(ADS1115)
         data = adc.read_adc(0, gain=GAIN)
         #data2 = adc.read_adc(1, gain=GAIN)
-        
+      
         #casring values of temperature and humidity into string
         tem = str(temperature)
         hum = str(humidity)
@@ -261,7 +261,7 @@ async def websocket_handler(websocket, path):
                 #converting to float
                 my_data = float(line)
                 #testing values
-                #if gretaer than zero and less than or equal 50 do the this
+                #if greater than zero and less than or equal 50 do the this
                 if 0 <= my_data <= 50:
                     lcd_string("Good",LCD_LINE_1)
                     lcd_string(line,LCD_LINE_2)
@@ -275,7 +275,7 @@ async def websocket_handler(websocket, path):
                     GPIO.output(green_led,True)
                     print(f'{line} Good.')
                 
-                #if gretaer than 50 and less than or equal 100 do the this   
+                #if greater than 50 and less than or equal 100 do the this   
                 elif 51 <= my_data <= 100:
                     lcd_string("Moderate",LCD_LINE_1)
                     lcd_string(line,LCD_LINE_2)
@@ -289,7 +289,7 @@ async def websocket_handler(websocket, path):
                     GPIO.output(yellow_led,True)
                     print(f'{line} Moderate.')
                  
-                #if gretaer than 100 and less than or equal 200 do the this 
+                #if greater than 100 and less than or equal 200 do the this 
                 elif 101 <= my_data <= 200:
                     lcd_string("Unhealthy",LCD_LINE_1)
                     lcd_string(line,LCD_LINE_2)
@@ -303,7 +303,7 @@ async def websocket_handler(websocket, path):
                     GPIO.output(Led_light,True)
                     print(f'{line} Unheathy.')
                
-               #if gretaer than 200 and less than or equal 300 do the this
+               #if greater than 200 and less than or equal 300 do the this
                 elif 201 <= my_data <= 300:
                     lcd_string("Very Unhealthy",LCD_LINE_1)
                     lcd_string(line,LCD_LINE_2)
@@ -316,7 +316,7 @@ async def websocket_handler(websocket, path):
                     GPIO.output(Buzzer,True)
                     GPIO.output(Led_light,True)
                     print(f'{line} Very Unheathy.')
-                  #if gretaer than 300 do the this  
+                  #if greater than 300 do the this  
                 else:
                     lcd_string("Hazardous",LCD_LINE_1)
                     lcd_string(line,LCD_LINE_2)
